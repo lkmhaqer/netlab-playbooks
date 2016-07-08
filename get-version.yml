@@ -1,0 +1,23 @@
+---
+- name: Get Device Facts
+  hosts: net-lab
+  roles:
+  - Juniper.junos 
+  connection: local
+  gather_facts: no
+
+  tasks:
+  - name: Checking NETCONF connectivity
+    wait_for: host={{ inventory_hostname }} port=830 timeout=5
+
+  - name: Retrieve information from devices running Junos OS
+    junos_get_facts:  
+      host={{ inventory_hostname }}
+    register: junos_stuff
+
+  - name: version
+    debug: msg="{{ mgmt_ip }} - {{ junos_stuff.facts.version }}"
+
+  - assert:
+      that:
+        - "'12.1X47-D40.1' in junos_stuff.facts.version"

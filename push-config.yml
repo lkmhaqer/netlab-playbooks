@@ -1,0 +1,18 @@
+---
+- name: Push config to Lab
+  hosts: net-lab
+  roles:
+  - Juniper.junos
+  connection: local
+  gather_facts: no
+
+  tasks:
+  - name: Checking NETCONF
+    wait_for: host={{ inventory_hostname }} port=830 timeout=5
+
+  - name:  Merging config
+    junos_install_config: 
+      host={{ inventory_hostname }}
+      file=../configs/global.conf
+      overwrite=false
+      logfile=../logs/global-config.log

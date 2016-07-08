@@ -1,0 +1,23 @@
+---
+- name: Shut down NET-LAB
+  hosts: net-lab
+  roles:
+  - Juniper.junos
+  connection: local
+  gather_facts: no
+
+  vars_prompt:
+  - name: shutdown
+    prompt: "Enter 'shutdown' to continue"
+    private: no
+
+  tasks:
+  - name: Checking NETCONF
+    wait_for: host={{ inventory_hostname }} port=830 timeout=5
+
+  - name: Shutting down VMs
+    junos_shutdown:
+      host={{ inventory_hostname }}
+      shutdown={{ shutdown }}
+      reboot=no
+    register: sd_result

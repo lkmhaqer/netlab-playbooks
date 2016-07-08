@@ -1,0 +1,35 @@
+---
+- name: Install JunOS Software
+  hosts: net-lab
+  roles:
+  - Juniper.junos
+  connection: local
+  gather_facts: no
+
+  vars:
+    wait_time: 3600
+    pkg_dir: ../junos-software
+    OS_version: 12.1X47-D40.1
+    OS_package: junos-vsrx-12.1X47-D40.1-domestic.tgz
+    log_dir: ../logs
+
+  tasks:
+  - name: Checking NETCONF
+    wait_for: host={{ inventory_hostname }} port=830 timeout=5
+
+  - name: Install JunOS
+    junos_install_os:
+      host={{ inventory_hostname }}
+      reboot=yes
+      version={{ OS_version }}
+      package={{ pkg_dir }}/{{OS_package }}
+      logfile={{ log_dir }}/{{ inventory_hostname}}-junos_install.log
+    register: sw
+    notify:
+    - wait_reboot
+
+  handlers:
+  - name: wait_reboot
+    wait_for: host={{ inventory_hostname }} port=830 timeout={{ wait_time }}
+    when: not sw.check_mode
+
